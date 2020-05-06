@@ -27,7 +27,7 @@ elem = elem + 1;
 
 
 # material constants
-E = 20.6;
+E = 30.6;
 nu = 0.3;
 
 lam = E * nu / ( (1 + nu) * (1 - 2 * nu) );
