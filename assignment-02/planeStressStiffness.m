@@ -52,7 +52,7 @@ lam = E * nu / ( (1 + nu) * (1 - 2 * nu) );
 mu = E / 2 / (1 + nu);
 
 #thickness of model
-t = 0.85;
+t = 1;
 
 ##============================== начало скрипта ================================
 
@@ -85,38 +85,35 @@ KM = _KM (p, q, node, elem, ne, lam, mu, t)
 
 ## локальные матрицы жЄсткости (дл€ выбранныз  Ё)
 for ne = 1:length(elem),
-printf("for element %i \n", ne);  
-LKK = _LKK (node, elem, ne, lam, mu, t)
+  printf("for element %i \n", ne);  
+  LKK = _LKK (node, elem, ne, lam, mu, t)
 endfor;
 
 ## глобальна€ матрица жЄсткости
 GKK = _GKK (node, elem, 1, lam, mu, t);
 for ie = 2:length(elem),
-GKK = GKK + _GKK (node, elem, ie, lam, mu, t);
+  GKK = GKK + _GKK (node, elem, ie, lam, mu, t);
 endfor
-GKK
+
 GGKC = _GKKC (node, elem, ne, lam, mu, t, bound, GKK);
-GGKC
-GGKCR = GGKC^(-1);
-GGKCR
-uu=GGKCR*GFFC;
-uu
-def = zeros(3,1);
-stress = zeros(3,1);
+uu = GGKC^(-1)*GFFC;
+
 for ne = 1:length(elem),
+  strain = zeros(3, 1);
   printf("for element %i \n", ne);  
-  for j=1:3,
-def(1)=def(1)+bb(j,ne)*uu(2*elem(ne,j)-1)/dd(1,ne);
-endfor;
-for j=1:3,
-def(2)=def(2)+cc(j,ne)*uu(2*elem(ne,j))/dd(1,ne);
-endfor;
-for j=1:3,
-def(3)=def(3)+cc(j,ne)*uu(2*elem(ne,j)-1)+bb(j,ne)*uu(2*elem(ne,j))/dd(1,ne);
-endfor;
-def
-s(1)=E/(1-nu^2)*(def(1)+nu*def(2));
-s(2)=E/(1-nu^2)*(def(2)+nu*def(1));
-s(3)=E/(1+nu)*def(3)/2;
-s
+  for j = 1:3,
+    strain(1) += bb(j, ne) * uu(2 * elem(ne, j) - 1) / dd(1, ne);
+  endfor;
+  for j = 1:3,
+    strain(2) += cc(j, ne) * uu(2 * elem(ne, j)) / dd(1, ne);
+  endfor;
+  for j = 1:3,
+    strain(3) += (cc(j, ne) * uu(2 * elem(ne, j) - 1) + bb(j, ne) * uu(2 * elem(ne, j))) / dd(1, ne);
+  endfor;
+  strain
+  stress = [
+    E / (1 - nu^2) * (strain(1) + nu * strain(2));
+    E / (1 - nu^2) * (strain(2) + nu * strain(1));
+    E / (1 + nu) * strain(3) / 2;
+  ]
 endfor;
