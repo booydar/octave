@@ -1,0 +1,16 @@
+function result = _GKK (node, elem, ne, lam, mu, t)
+  n = 3;
+  d = 2;
+  N = length(node);
+  result = zeros(N * d, N * d);
+  LKK = _LKK (node, elem, ne, lam, mu, t);
+  for p = 1:n,
+    for q = 1:n,
+      for i = 1:d,
+        for j = 1:d,
+          result(i + d * (elem(ne, p) - 1), j + d * (elem(ne, q) - 1)) = LKK(i + d * (p - 1), j + d * (q - 1));
+        endfor;
+      endfor;
+    endfor;
+  endfor;   
+endfunction
